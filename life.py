@@ -39,28 +39,31 @@ def main():
 	drawGridLines()
 	pygame.display.update()
 	
-	grid[(6,2)].state = True
-	grid[(6,3)].state = True
-	grid[(5,3)].state = True
-	grid[(5,2)].state = True
-	grid[(5,4)].state = True
-	grid[(6,5)].state = True
-
-	grid[(0,7)].state = True
-	grid[(0,8)].state = True
-	grid[(1,7)].state = True
-	grid[(1,8)].state = True
 	drawGrid()
 	pygame.display.update()
+
+	runGame = False
 	while True:
-	    for event in pygame.event.get():
-	    	if event.type == QUIT:
-	    		pygame.quit()
-	    		sys.exit()
-	    pygame.time.wait(800)
-	    grid = updateGrid()
-	    drawGrid()
-	    pygame.display.update()
+		drawGrid()
+		pygame.display.update()
+		for event in pygame.event.get():
+			if event.type == QUIT:
+				pygame.quit()
+				sys.exit()
+			if event.type == MOUSEBUTTONUP:
+				xpos = event.pos[0]/20
+				ypos = event.pos[1]/20
+				grid[(xpos,ypos)].state = not grid[(xpos,ypos)].state
+			if event.type == KEYDOWN:
+				if event.key == K_SPACE:
+					runGame = not runGame
+
+		if runGame == True:
+			grid = updateGrid()
+			drawGrid()
+			pygame.display.update()
+
+			pygame.time.wait(800)
 
 
 def updateGrid():
@@ -73,12 +76,15 @@ def updateGrid():
 					newgrid[(x,y)].state = False
 				else:
 					newgrid[(x,y)].state = True
+			if grid[(x,y)].state == False:
+				if getNeighbours(grid[(x,y)]) == 3:
+					newgrid[(x,y)].state = True
 				
 	return newgrid
 
 def getNeighbours(square):
 	neighbours = 0
-	for x in range(square.x-1,square.x+1):
+	for x in range(square.x-1,square.x+2):
 		if x>-1 and square.y-1>-1 and x<VERT_SQUARES:
 			if grid[(x,square.y-1)].state==True:
 				neighbours += 1
@@ -88,7 +94,7 @@ def getNeighbours(square):
 	if square.x+1<HOR_SQUARES:
 		if grid[(square.x+1,square.y)].state == True:
 			neighbours += 1
-	for x in range (square.x-1,square.x+1):
+	for x in range (square.x-1,square.x+2):
 		if x>-1 and x<VERT_SQUARES and square.y+1<VERT_SQUARES:
 			if grid[(x,square.y+1)].state==True:
 				neighbours += 1
